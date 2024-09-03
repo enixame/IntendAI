@@ -11,6 +11,9 @@ IntendAI est un projet de machine learning conçu pour classer les intentions à
 - **README.md**: Documentation du projet.
 - **requirements.txt**: Liste des dépendances nécessaires pour exécuter le projet.
 
+## Pré-requis
+- Microsoft Visual C++ 14.0 or greater is required. Get it with "Microsoft C++ Build Tools": https://visualstudio.microsoft.com/visual-cpp-build-tools/
+
 ## Installation
 
 1. Clonez ce dépôt.
