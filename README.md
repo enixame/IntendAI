@@ -12,7 +12,20 @@ IntendAI est un projet de machine learning conçu pour classer les intentions à
 - **requirements.txt**: Liste des dépendances nécessaires pour exécuter le projet.
 
 ## Pré-requis
-- Microsoft Visual C++ 14.0 or greater is required. Get it with "Microsoft C++ Build Tools": https://visualstudio.microsoft.com/visual-cpp-build-tools/
+- Microsoft Visual C++ 14.0 or supérieur requis. "Microsoft C++ Build Tools": https://visualstudio.microsoft.com/visual-cpp-build-tools/
+- Installer Rust Compiler: rustup (disponible sur https://rustup.rs)
+- Télécharger les pilotes NVIDIA et CUDA depuis le site officiel de NVIDIA : https://developer.nvidia.com/cuda-11-8-0-download-archive#:~:text=Click%20on%20the%20green.
+- Aller sur le site officiel de PyTorch: https://pytorch.org/get-started/locally/
+- Sélectionner les Options Correctes:
+```
+    PyTorch Build: Stable
+    Your OS: Sélectionne ton système d'exploitation (Linux, Windows, macOS)
+    Package: pip
+    Language: Python
+    Compute Platform: CUDA 11.8 ou une version compatible
+```bash
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+
 
 ## Installation
 
