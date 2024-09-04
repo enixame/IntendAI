@@ -23,9 +23,10 @@ IntendAI est un projet de machine learning conçu pour classer les intentions à
     Package: pip
     Language: Python
     Compute Platform: CUDA 11.8 ou une version compatible
+```
 ```bash
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
-
+```
 
 ## Installation
 
