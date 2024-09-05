@@ -10,6 +10,36 @@
             "request": "launch",
             "module": "src.intendai.main",
             "cwd": "${workspaceFolder}"
+        },
+        {
+            "name": "Test Debugger: Current File Test",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pytest",
+            "console": "integratedTerminal",
+            "args": [
+                "-s", "${file}"
+            ],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "name": "Test Debugger: Selected Method Test",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pytest",
+            "console": "integratedTerminal",
+            "args": [
+                "-s", "${file}::${selectedText}"
+            ],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "name": "Test Debugger: All Tests",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pytest",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}"
         }
     ]
 }
