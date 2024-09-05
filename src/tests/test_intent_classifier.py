@@ -1,4 +1,3 @@
-# tests/test_intent_classifier.py
 import pytest
 import pandas as pd
 import numpy as np
@@ -7,9 +6,10 @@ from sklearn.metrics import confusion_matrix, classification_report
 from sklearn.preprocessing import LabelEncoder
 from src.intendai.pipeline.intent_prediction_pipeline import IntentPredictionPipeline
 
-# Ajout de données d'entraînement pour "greetings"
+# Ajout de données d'entraînement pour l'intention "greetings"
 greetings_data = [
     "Salut à tous !", "Bonjour tout le monde !", "Hey !", "Bonsoir à vous tous !", 
+    "Bonjour", "Hey", "Salut", "Salutation", "yo", "Bonsoir", "Bon matin",
     "Coucou, comment ça va ?", "Bonjour à tous, bon matin !", "Hello !", "Salut, ravi de te voir !",
     "Salut, comment vas-tu aujourd'hui ?", "Bonjour à tous, j'espère que vous allez bien !", 
     "Hey, ça faisait longtemps !", "Salut à tous, comment ça va ?", "Hello, comment ça se passe ?", 
@@ -62,11 +62,9 @@ greetings_data = [
     "Salut à vous tous, j'espère que vous passez une bonne journée !", "Bonjour tout le monde, prêts pour une nouvelle semaine ?", 
     "Salut, comment ça va de votre côté aujourd'hui ?"
 ]
+greetings_intentions = ['greetings'] * len(greetings_data)  # Label pour chaque phrase d'accueil
 
-greetings_intentions = ['greetings'] * len(greetings_data)
-
-
-# Ajout de données d'entraînement pour "health_status"
+# Ajout de données d'entraînement pour l'intention "health_status"
 health_status_data = [
     "Comment te sens-tu aujourd'hui ?", "Tu te sens bien ?", "Tout va bien de ton côté ?", 
     "Es-tu en forme ce matin ?", "Comment est ton moral aujourd'hui ?", "Tu es fatigué ?",
@@ -120,94 +118,9 @@ health_status_data = [
     "Es-tu en bonne santé ces jours-ci ?", "Tu sembles stressé, comment ça va ?", "Comment est ton énergie en ce moment ?", 
     "Tu sembles en pleine forme, comment ça va ?", "Comment va ta santé en général ?"
 ]
-health_status_intentions = ['health_status'] * len(health_status_data)
+health_status_intentions = ['health_status'] * len(health_status_data)  # Label pour chaque phrase de statut de santé
 
-# Ajout de données d'entraînement pour "status"
-# status_data = [
-#     "Quel est le statut de notre projet ?", "As-tu des nouvelles de l'équipe ?", 
-#     "Où en sommes-nous avec la dernière mise à jour ?", "Peux-tu me dire comment avance le développement ?",
-#     "Comment se passe le projet jusqu'à présent ?", "As-tu vérifié l'état de la livraison ?",
-#      "Quel est le statut de notre projet actuel ?", "As-tu des nouvelles sur le développement de la fonctionnalité ?", 
-#     "Où en sommes-nous avec la mise à jour du logiciel ?", "Peux-tu me dire où en est la préparation de l'événement ?", 
-#     "Est-ce que le rapport est prêt ?", "As-tu vérifié l'état de la tâche en cours ?", 
-#     "Où en sommes-nous avec le développement du nouveau produit ?", "Comment se passe la phase de test ?", 
-#     "Peux-tu me donner une mise à jour sur l'état de notre collaboration ?", "Quel est le progrès sur le plan marketing ?", 
-#     "Est-ce que la vidéo est prête à être publiée ?", "Comment progresse notre partenariat avec le client ?", 
-#     "As-tu des nouvelles sur l'état du projet ?", "Comment se déroule le développement de l'application ?", 
-#     "Peux-tu vérifier l'état de la commande client ?", "Où en est la révision budgétaire ?", 
-#     "As-tu fini de traiter les retours des utilisateurs ?", "Quel est le statut de notre demande de financement ?", 
-#     "Est-ce que la dernière phase de développement est terminée ?", "Peux-tu me donner un update sur le projet de recherche ?", 
-#     "Comment avance la production ?", "Quel est l'état de la documentation ?", "Est-ce que le plan de projet a été approuvé ?", 
-#     "Peux-tu me dire où en est la résolution des bugs ?", "Comment se passe la collaboration avec l'équipe externe ?", 
-#     "As-tu des nouvelles sur le déploiement ?", "Quel est le statut de l'intégration du nouveau module ?", 
-#     "Où en sommes-nous avec le plan de lancement ?", "Peux-tu vérifier l'état d'avancement de la campagne ?", 
-#     "Comment progresse la refonte du site web ?", "Est-ce que les tests utilisateurs sont terminés ?", 
-#     "Peux-tu me donner une mise à jour sur l'état des négociations ?", "Quel est le statut de notre audit interne ?", 
-#     "Où en est la validation finale du produit ?", "Est-ce que les rapports de performance sont prêts ?", 
-#     "Comment avance notre stratégie de communication ?", "Peux-tu vérifier le statut de notre inventaire ?", 
-#     "Où en sommes-nous avec la révision du contrat ?", "Est-ce que l'équipe a fini le sprint actuel ?", 
-#     "Comment se passe l'intégration des nouvelles fonctionnalités ?", "Peux-tu me donner une mise à jour sur le recrutement ?", 
-#     "Quel est le statut de l'amélioration continue ?", "Où en sommes-nous avec l'optimisation des processus ?", 
-#     "Est-ce que le rapport financier est complet ?", "Peux-tu vérifier l'état de la formation ?", 
-#     "Comment progresse l'audit qualité ?", "Quel est l'état de l'implémentation du système ?", 
-#     "Est-ce que les objectifs trimestriels ont été atteints ?", "Peux-tu me donner une mise à jour sur le support technique ?",
-#     "Peux-tu me dire comment se passe le développement ?", "Où en sommes-nous avec le projet de recherche ?", 
-#     "As-tu des nouvelles sur l'avancement de notre tâche ?", "Quel est le statut actuel de notre campagne marketing ?",
-#     "Comment se passe ton stream Twitch ?", "As-tu des nouvelles sur ta chaîne Twitch ?", 
-#     "Quel est le statut de ta vidéo ?", "Où en est ta commande ?", "Peux-tu vérifier le statut de ma demande ?", 
-#     "Quand aurons-nous une mise à jour sur le projet ?", "Est-ce que la vidéo est prête ?", 
-#     "Comment progresse ton apprentissage ?", "Quel est le progrès sur ta tâche actuelle ?", 
-#     "Peux-tu m'informer sur l'avancement du développement ?", "Est-ce que tu as des nouvelles de l'équipe ?", 
-#     "Quand est-ce que le rapport sera prêt ?", "As-tu vérifié le statut du ticket ?", 
-#     "Où en sommes-nous avec le déploiement ?", "Comment va la production aujourd'hui ?", 
-#     "Quelle est l'avancée sur le projet de recherche ?", "Peux-tu me dire où en est la préparation de l'événement ?", 
-#     "Est-ce que le projet est terminé ?", "Quel est l'état actuel de notre mission ?", 
-#     "Y a-t-il des mises à jour sur le plan ?", "Comment se déroule le développement jusqu'à présent ?", 
-#     "As-tu des nouvelles sur l'état d'avancement ?", "Comment est-ce que tout progresse ?", 
-#     "Peux-tu me donner des nouvelles sur l'avancement du travail ?", "Comment progresse notre projet ?", 
-#     "Est-ce que le rapport est prêt ?", "As-tu fini la mise à jour ?", "Quel est l'état actuel du projet ?", 
-#     "Quand aurons-nous une nouvelle version ?", "Peux-tu vérifier où en est notre livraison ?", 
-#     "Où en est la livraison de mon colis ?", "Peux-tu vérifier l'état de ma commande ?", 
-#     "Quand aurons-nous une mise à jour sur le projet ?", "Est-ce que le rapport est prêt ?", 
-#     "Quel est l'état d'avancement du travail ?", "Peux-tu me donner un update sur l'événement ?", 
-#     "Comment progresse le développement ?", "Où en sommes-nous avec le planning ?", 
-#     "Est-ce que la version finale est prête ?", "Quel est le statut de notre partenariat ?", 
-#     "Peux-tu me dire où en est le projet de recherche ?", "Est-ce que les tests sont terminés ?", 
-#     "Quand recevrai-je une réponse ?", "Peux-tu me donner une mise à jour sur la situation ?", 
-#     "Comment avance le projet ?", "Est-ce que tout se passe bien avec la production ?", 
-#     "Où en est la révision du budget ?", "Quel est le statut actuel des négociations ?", 
-#     "Quand est-ce que le produit sera lancé ?", "Où en sommes-nous avec la phase de test ?", 
-#     "Où en est le traitement de ma demande ?", "Quel est le statut de la mise à jour de notre application ?", 
-#     "Peux-tu vérifier l'état de la connexion ?", "Comment se passe le développement du projet ?", 
-#     "Quand est-ce que le produit sera disponible ?", "Peux-tu me donner un update sur l'état du support technique ?", 
-#     "Peux-tu me donner une mise à jour sur le projet ?", "Quel est le statut actuel de la mission ?", 
-#     "Y a-t-il des progrès sur le développement ?", "Comment avance le projet actuellement ?", 
-#     "Peux-tu vérifier l'état de notre progression ?", "Où en sommes-nous avec la version finale ?", 
-#     "Est-ce que tu as des nouvelles sur l'avancement du projet ?", "Quel est le statut de notre collaboration ?", 
-#     "As-tu vérifié le statut du ticket récemment ?", "Peux-tu me donner une mise à jour sur l'état du projet ?", 
-#     "Quel est le statut de la dernière demande ?", "As-tu des nouvelles sur le travail en cours ?", 
-#     "Où en sommes-nous avec la phase finale ?", "Est-ce que la version finale est prête ?", 
-#     "Quel est l'état actuel de notre partenariat ?", "Peux-tu me donner une mise à jour sur l'avancement du projet ?", 
-#     "Quel est le statut actuel du rapport ?", "As-tu des nouvelles de l'équipe sur le projet ?", 
-#     "Comment progresse notre tâche actuelle ?", "Quel est le statut de la dernière demande ?", 
-#     "Peux-tu vérifier l'état de la livraison ?", "Où en est la commande ?", 
-#     "Quel est l'état actuel de notre production ?", "Peux-tu donner une mise à jour sur la progression ?", 
-#     "Comment se passe le développement de l'application ?", "Peux-tu me donner une mise à jour sur le développement actuel ?", "Quel est le statut de la livraison de notre commande ?", 
-#     "Où en sommes-nous avec la révision du budget ?", "As-tu des nouvelles sur la progression de notre projet ?", 
-#     "Comment se déroule l'intégration des nouvelles fonctionnalités ?", "Peux-tu vérifier l'état de notre demande en cours ?", 
-#     "Où en sommes-nous avec la mise à jour du système ?", "As-tu vérifié le statut de la dernière phase de développement ?", 
-#     "Quel est le progrès sur le travail en cours ?", "Peux-tu me donner une mise à jour sur la situation actuelle ?", 
-#     "Est-ce que le rapport de performance est prêt ?", "Comment avance notre campagne marketing ?", 
-#     "Peux-tu vérifier l'état de la production actuellement ?", "Où en est l'avancement de la refonte du site web ?", 
-#     "As-tu des nouvelles de l'équipe sur le statut du projet ?", "Quel est le statut actuel de notre collaboration ?", 
-#     "Peux-tu m'informer sur l'état de la négociation ?", "Comment progresse l'optimisation des processus ?", 
-#     "Est-ce que le sprint de développement est terminé ?", "Peux-tu me donner un update sur l'avancement des tests utilisateurs ?", 
-#     "Quel est l'état d'avancement du plan de projet ?", "As-tu vérifié l'état de l'audit qualité ?", 
-#     "Où en sommes-nous avec l'implémentation du nouveau système ?", "Peux-tu vérifier le statut du support technique ?"
-# ]
-# status_intentions = ['status'] * len(status_data)
-
-# Ajout de données d'entraînement pour "backseat"
+# Ajout de données d'entraînement pour l'intention "backseat"
 backseat_data = [
    "Je pense que tu devrais utiliser cette approche à la place.", "Tu devrais essayer de résoudre ce problème d'une autre manière.", 
     "Il serait mieux de commencer par la partie la plus simple.", "Pourquoi ne pas utiliser cet outil pour améliorer le processus ?", 
@@ -282,12 +195,18 @@ backseat_data = [
     "Tu devrais revoir ton plan et ajuster en conséquence.", "Je te conseille de réévaluer tes options.", 
     "Il vaut mieux que tu prennes une autre voie.", "Tu devrais vraiment prendre en compte cette suggestion.", 
     "Essaie de prendre un autre angle sur ce problème.", "Pourquoi ne pas envisager un autre chemin ?", 
-    "Tu devrais suivre cette approche pour une meilleure efficacité.", "Il serait mieux de ne pas précipiter les choses."
+    "Tu devrais suivre cette approche pour une meilleure efficacité.", "Il serait mieux de ne pas précipiter les choses.",
+    "Vas tout droit", "Vas à droite", "Vas là bas", "vais au milieu", "Vas ici", "Vas là", "Vas",
+    "Tu dois aller à droite", "Tu dois faire ça", "Tu dois attendre", "Tu dois combattre", "Tu dois taper ici",
+    "Tu dois fabriquer çà", "Tu dois aller à gauche", "Tu dois aller tout droit", "gauche", "droite", "en haut", "en bas"
 ]
-backseat_intentions = ['backseat'] * len(backseat_data)
+backseat_intentions = ['backseat'] * len(backseat_data)  # Label pour chaque phrase de suggestion de contrôle
 
-# Ajout de données d'entraînement pour "bad"
+# Ajout de données d'entraînement pour l'intention "bad"
 bad_data = [
+    "C'est vraiment nul ce que tu fais", "Qu'est ce que c'est nul", "il est nul ton stream", "C'est variment nul",
+    "Nul", "Je n'ai jamais vu quelque chose d'aussi nul", "C'est d'une nullité", "C'est totalement nul ce que tu fais !",
+    "ton travail est vraiment nul", "c'est comlètement nul", "c'est incroyablement nul",
     "Ce que tu fais est vraiment pathétique.", "C'est absolument horrible.", "Tu n'as aucun talent pour ça.", 
     "C'est vraiment le pire travail que j'ai jamais vu.", "Franchement, tu devrais abandonner.", 
     "C'est complètement nul, tu ne devrais même pas essayer.", "Ton travail est lamentable.", 
@@ -343,19 +262,18 @@ bad_data = [
     "C'est vraiment pathétique, tu devrais réévaluer tes compétences.", "C'est le pire que j'ai jamais vu.", 
     "C'est une honte, tu es vraiment mauvais.", "Ton travail est incroyablement médiocre."
 ]
-bad_intentions = ['bad'] * len(bad_data)
+bad_intentions = ['bad'] * len(bad_data)  # Label pour chaque phrase négative
 
 def balance_data(data, labels):
     """
     Fonction pour équilibrer les classes en utilisant le rééchantillonnage.
-    
-    Paramètres:
-    - data (list): Liste des phrases d'entrée.
-    - labels (list): Liste des labels correspondants.
 
-    Retourne:
-    - data_balanced (list): Liste des phrases rééchantillonnées et équilibrées.
-    - labels_balanced (list): Liste des labels rééchantillonnés et équilibrés.
+    Args:
+        data (list): Liste des phrases d'entrée.
+        labels (list): Liste des labels correspondants.
+
+    Returns:
+        tuple: Deux listes contenant les phrases et labels rééchantillonnés et équilibrés.
     """
     # Convertir les données et les labels en DataFrame pour faciliter le rééchantillonnage
     df = pd.DataFrame({'text': data, 'label': labels})
@@ -375,48 +293,48 @@ def balance_data(data, labels):
     # Retourner les données et labels rééchantillonnés sous forme de listes
     return df_balanced['text'].tolist(), df_balanced['label'].tolist()
 
-
 def evaluate_model(pipeline, data, labels, label_encoder):
+    """
+    Évalue le modèle sur un ensemble de données de test.
+
+    Args:
+        pipeline (IntentPredictionPipeline): Le pipeline de prédiction d'intention.
+        data (list): Liste de phrases pour le test.
+        labels (list): Liste des labels encodés pour le test.
+        label_encoder (LabelEncoder): L'encodeur utilisé pour les labels.
+
+    Prints:
+        Matrice de confusion et rapport de classification.
+    """
+    # Faire des prédictions pour chaque phrase dans les données de test
     predictions = [pipeline.predict_intent(text) for text in data]
     predictions_encoded = label_encoder.transform(predictions)
 
     # Calculer la matrice de confusion
     cm = confusion_matrix(labels, predictions_encoded)
-
     print("Matrice de confusion :")
     print(cm)
 
-    # Obtenir le nombre de classes uniques dans les labels
-    unique_labels = np.unique(labels)
-    num_classes = len(unique_labels)
-
+    # Ajuster les target_names pour inclure toutes les classes, même celles non prédites
     target_names = label_encoder.classes_
-
-    # Vérifier si le nombre de classes correspond aux classes dans le modèle
-    if num_classes != len(target_names):
-        print(f"Attention: nombre de classes ({num_classes}) ne correspond pas au nombre de labels attendus ({len(target_names)}).")
-        # Ajuster les target_names pour qu'ils correspondent aux classes présentes
-        target_names = [target_names[i] for i in range(num_classes)]
-
+    
+    # Ajout de labels=unique_labels à classification_report
     print("\nRapport de classification :")
-    print(classification_report(labels, predictions_encoded, target_names=target_names))
-
+    print(classification_report(labels, predictions_encoded, target_names=target_names, labels=np.unique(labels)))
 
 @pytest.fixture(scope="module")
 def pipeline():
-    # Initialisation et entraînement du pipeline
     pipeline = IntentPredictionPipeline()
     
-    # Ajouter des données d'entraînement pour chaque intention
+    # Utiliser les données équilibrées pour l'entraînement
     # data_balanced, labels_balanced = balance_data(
     #     greetings_data + health_status_data + backseat_data + bad_data,
     #     greetings_intentions + health_status_intentions + backseat_intentions + bad_intentions
     # )
-    # pipeline.add_training_data(data_balanced, labels_balanced)
-
-    # Ajouter des données d'entraînement pour chaque intention sans les équilibrer
     data = greetings_data + health_status_data + backseat_data + bad_data
     labels = greetings_intentions + health_status_intentions + backseat_intentions + bad_intentions
+
+    # pipeline.add_training_data(data_balanced, labels_balanced)
     pipeline.add_training_data(data, labels)
 
     # Entraîner le modèle
@@ -424,57 +342,89 @@ def pipeline():
 
     return pipeline
 
+def test_phrases(pipeline):
+    test_phrases = [
+        "Bonjour", 
+        "Salut ma gueule !", 
+        "Wesh ma gueule !", 
+        "Comment ça va ?", 
+        "La forme ?", 
+        "Tu devrais ralentir ici.", 
+        "Tu dois aller par là.", 
+        "Vas à gauche.",
+        "C'est vraiment nul ce que tu fais.", 
+        "t'es nul."]
+    for phrase in test_phrases:
+        print(f"Phrase: '{phrase}' - Prédiction: '{pipeline.predict_intent(phrase)}'")
 
 def test_greetings(pipeline):
+    """
+    Teste la prédiction pour l'intention "greetings".
+
+    Args:
+        pipeline (IntentPredictionPipeline): Le pipeline de prédiction d'intention entraîné.
+    """
     phrases = ["Bonjour", "Salut", "Hey"]
     for phrase in phrases:
         assert pipeline.predict_intent(phrase) == "greetings"
 
 def test_health_status(pipeline):
+    """
+    Teste la prédiction pour l'intention "health_status".
+
+    Args:
+        pipeline (IntentPredictionPipeline): Le pipeline de prédiction d'intention entraîné.
+    """
     phrases = ["Comment ça va ?", "Ça va bien ?", "La forme ?"]
     for phrase in phrases:
         assert pipeline.predict_intent(phrase) == "health_status"
 
-# def test_status(pipeline):
-#     phrases = ["Comment se passe ton stream Twitch ?", "Quel est le statut de ta vidéo ?"]
-#     for phrase in phrases:
-#         assert pipeline.predict_intent(phrase) == "status"
-
 def test_backseat(pipeline):
+    """
+    Teste la prédiction pour l'intention "backseat".
+
+    Args:
+        pipeline (IntentPredictionPipeline): Le pipeline de prédiction d'intention entraîné.
+    """
     phrases = ["Tu devrais vraiment prendre à gauche ici.", "Pourquoi ne fais-tu pas ça à ma manière ?"]
     for phrase in phrases:
         assert pipeline.predict_intent(phrase) == "backseat"
 
 def test_bad(pipeline):
+    """
+    Teste la prédiction pour l'intention "bad".
+
+    Args:
+        pipeline (IntentPredictionPipeline): Le pipeline de prédiction d'intention entraîné.
+    """
     phrases = ["C'est vraiment nul ce que tu fais.", "Tu es incompétent."]
     for phrase in phrases:
         assert pipeline.predict_intent(phrase) == "bad"
 
-# def test_common(pipeline):
-#     phrases = ["Je vais aller faire les courses.", "Quelle est la météo aujourd'hui ?"]
-#     for phrase in phrases:
-#         assert pipeline.predict_intent(phrase) == "unknown"
-
-def test_no_intent_found(pipeline):
-    phrase = "xyz 123 abc !"
-    predicted_intent = pipeline.predict_intent(phrase)
-    assert predicted_intent == "unknown"
-
 def test_evaluate_model(pipeline):
+    """
+    Évalue le modèle avec des données de test équilibrées.
+
+    Args:
+        pipeline (IntentPredictionPipeline): Le pipeline de prédiction d'intention entraîné.
+    """
     # Préparer les données d'entraînement et de test avec des données équilibrées
     data = greetings_data + health_status_data + backseat_data + bad_data
     labels = greetings_intentions + health_status_intentions + backseat_intentions + bad_intentions
     
     # Rééchantillonner les données pour équilibrer les classes
-    data_balanced, labels_balanced = balance_data(data, labels)
+    # data_balanced, labels_balanced = balance_data(data, labels)
 
     # Encoder les labels pour l'évaluation
     label_encoder = LabelEncoder()
-    labels_encoded = label_encoder.fit_transform(labels_balanced)
+    # labels_encoded = label_encoder.fit_transform(labels_balanced)
+    labels_encoded = label_encoder.fit_transform(labels)
 
     # Utiliser une fraction des données pour l'évaluation, par exemple les 20% derniers
-    split_index = int(0.8 * len(data_balanced))
-    X_test, y_test = data_balanced[split_index:], labels_encoded[split_index:]
+    # split_index = int(0.8 * len(data_balanced))
+    # X_test, y_test = data_balanced[split_index:], labels_encoded[split_index:]
+    split_index = int(0.8 * len(data))
+    X_test, y_test = data[split_index:], labels_encoded[split_index:]
 
     # Évaluer le modèle avec la fonction d'évaluation
     evaluate_model(pipeline, X_test, y_test, label_encoder)

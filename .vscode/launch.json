@@ -18,7 +18,7 @@
             "module": "pytest",
             "console": "integratedTerminal",
             "args": [
-                "${file}"
+                "-s", "${file}"
             ],
             "cwd": "${workspaceFolder}"
         },
@@ -29,7 +29,7 @@
             "module": "pytest",
             "console": "integratedTerminal",
             "args": [
-                "${file}::${selectedText}"
+                "-s", "${file}::${selectedText}"
             ],
             "cwd": "${workspaceFolder}"
         },
