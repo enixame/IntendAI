@@ -5,7 +5,7 @@ IntendAI est un projet de machine learning conçu pour classer les intentions à
 
 ### Optimisations incluses
 
-- <b>Fine-tuning avancé</b> avec le modèle DeBERTa pour ajuster les poids sur tes données spécifiques.
+- <b>Fine-tuning avancé</b> avec le modèle DeBERTa pour ajuster les poids sur les données spécifiques.
 - <b>Gestion des classes non représentées</b> grâce à un rééchantillonnage et un ajustement des poids de classe.
 - <b>Utilisation de poids de classe</b> pour corriger les déséquilibres dans les classes de sortie.
 - <b>Entraînement prolongé</b> avec un nombre d'époques élevé et un ajustement progressif du learning rate pour de meilleures performances sur des données complexes.
