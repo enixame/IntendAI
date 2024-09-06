@@ -119,6 +119,8 @@ Cela suggère que le modèle est capable de bien distinguer les classes ask et b
 - <b>Accuracy (exactitude) :</b> 1.00 — le modèle a classé correctement toutes les instances du jeu de données.
 - <b>Macro avg et Weighted avg :</b> 1.00 — la moyenne des scores pour chaque classe, indiquant une performance parfaite à la fois en pondérant et sans pondérer par le nombre d'exemples dans chaque classe.
 
+_______________________
+
 ## Structure du Projet
 
 - **src/intendai/data/data_handler.py**: Contient la classe `DataHandler` qui gère la collecte et la gestion des données.
