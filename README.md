@@ -59,6 +59,8 @@ La RAM est utilisée pour charger les données en mémoire avant de les passer a
 - Recommandation minimale : 8 Go de RAM.
 - <b>Recommandation optimale</b> : 16 Go ou plus, idéalement 32 Go pour les modèles complexes.
 
+### Résultats
+
 | Phrase                                                         | Prédiction            |
 |----------------------------------------------------------------|-----------------------|
 | 'Bonjour'                                                      | 'greetings'           |
