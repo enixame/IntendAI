@@ -123,13 +123,7 @@ _______________________
 
 ## Structure du Projet
 
-- **src/intendai/data/data_handler.py**: Contient la classe `DataHandler` qui gère la collecte et la gestion des données.
-- **src/intendai/preprocessing/preprocessor.py**: Contient la classe `Preprocessor` pour le prétraitement du texte.
-- **src/intendai/model/intent_classifier.py**: Contient la classe `IntentClassifier` pour l'entraînement et la prédiction des intentions.
 - **src/intendai/pipeline/intent_prediction_pipeline.py**: Contient la classe `IntentPredictionPipeline` qui orchestre l'ensemble du processus de classification des intentions.
-- **src/intendai/main.py**: Script principal pour exécuter le pipeline.
-- **README.md**: Documentation du projet.
-- **requirements.txt**: Liste des dépendances nécessaires pour exécuter le projet.
 
 ## Pré-requis
 - Microsoft Visual C++ 14.0 or supérieur requis. "Microsoft C++ Build Tools": https://visualstudio.microsoft.com/visual-cpp-build-tools/

@@ -1,0 +1,25 @@
+{
+    "intents": {
+        "greetings": [
+            
+        ],
+        "health_status": [
+            
+        ],
+        "backseat": [
+            
+        ],
+        "bad": [
+            
+        ],
+        "common": [
+            
+        ],
+        "common_confirmation": [
+           
+        ],
+        "ask": [
+            
+        ]
+    }
+}

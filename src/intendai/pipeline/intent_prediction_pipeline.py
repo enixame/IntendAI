@@ -1,15 +1,23 @@
-from transformers import DebertaTokenizer, DebertaForSequenceClassification, Trainer, TrainingArguments
-import torch
-from sklearn.preprocessing import LabelEncoder
-from torch.utils.data import Dataset
-from sklearn.model_selection import train_test_split
-from sklearn.utils.class_weight import compute_class_weight
-from sklearn.metrics import accuracy_score, precision_recall_fscore_support
+# src/intendai/pipeline/intent_prediction_pipeline.py
+
+import json
 import numpy as np
+import os
+import pickle
 import pandas as pd
+import torch
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, precision_recall_fscore_support
 from sklearn.utils import resample
+from sklearn.utils.class_weight import compute_class_weight
+from torch.utils.data import Dataset
+from sklearn.preprocessing import LabelEncoder
+from transformers import DebertaTokenizer, DebertaForSequenceClassification, Trainer, TrainingArguments
 
 class CustomDataset(Dataset):
+    """
+    Dataset personnalisé pour le modèle Deberta avec encodage des phrases et des labels.
+    """
     def __init__(self, encodings, labels):
         self.encodings = encodings
         self.labels = labels
@@ -23,6 +31,9 @@ class CustomDataset(Dataset):
         return len(self.labels)
 
 class CustomTrainer(Trainer):
+    """
+    Trainer personnalisé pour inclure les poids des classes dans la fonction de perte.
+    """
     def __init__(self, *args, class_weights=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.class_weights = class_weights
@@ -36,6 +47,9 @@ class CustomTrainer(Trainer):
         return (loss, outputs) if return_outputs else loss
 
 def compute_metrics(pred):
+    """
+    Fonction pour calculer les métriques à partir des prédictions du modèle.
+    """
     labels = pred.label_ids
     preds = np.argmax(pred.predictions, axis=1)
     precision, recall, f1, _ = precision_recall_fscore_support(labels, preds, average='weighted')
@@ -58,20 +72,54 @@ def balance_data(data, labels):
     return df_balanced['text'].tolist(), df_balanced['label'].tolist()
 
 class IntentPredictionPipeline:
+    """
+    Pipeline de prédiction d'intention utilisant DeBERTa.
+    """
     def __init__(self):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.tokenizer = DebertaTokenizer.from_pretrained('microsoft/deberta-base')
         self.model = DebertaForSequenceClassification.from_pretrained('microsoft/deberta-base', num_labels=7)
         self.model.to(self.device)
+        self.label_encoder = None
+        self.class_weights = None
 
-        all_possible_labels = ['greetings', 'health_status', 'backseat', 'bad', 'common', 'common_confirmation', 'ask']
+
+    def load_training_data_from_json(self, json_path):
+        """
+        Charge les données d'entraînement depuis un fichier JSON et prépare les phrases et labels.
+
+        Args:
+            json_path (str): Chemin vers le fichier JSON contenant les phrases et intentions.
+        
+        Returns:
+            Tuple (list, list): Liste des phrases et des labels encodés.
+        """
+        with open(json_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+
+        phrases = []
+        labels = []
+
+        # Extraction des phrases et des labels depuis le fichier JSON
+        for intent, phrases_list in data["intents"].items():
+            phrases.extend(phrases_list)
+            labels.extend([intent] * len(phrases_list))
+
+        # Encode les labels avec LabelEncoder
         self.label_encoder = LabelEncoder()
-        self.label_encoder.fit(all_possible_labels)
+        labels_encoded = self.label_encoder.fit_transform(labels)
+
+        return phrases, labels_encoded
+
 
     def add_training_data(self, data, labels):
-        # Encoder les labels en nombres entiers
-        labels = self.label_encoder.transform(labels)
-        
+        """
+        Prépare les données d'entraînement et de validation pour l'entraînement.
+
+        Args:
+            data (list): Liste des phrases.
+            labels (list): Liste des labels encodés.
+        """
         # Rééchantillonnage pour équilibrer les classes sous-représentées
         data_balanced, labels_balanced = balance_data(data, labels)
 
@@ -100,7 +148,11 @@ class IntentPredictionPipeline:
 
         self.class_weights = torch.tensor(weights, dtype=torch.float).to(self.device)
 
+
     def train_model(self):
+        """
+        Entraîne le modèle sur les données fournies.
+        """
         training_args = TrainingArguments(
             output_dir='./results',
             num_train_epochs=20,  # Augmenter le nombre d'époques
@@ -117,18 +169,18 @@ class IntentPredictionPipeline:
             metric_for_best_model="accuracy",
             gradient_accumulation_steps=2,
             fp16=True,
-            learning_rate=1e-5,  # Diminuer le taux d'apprentissage
+            learning_rate=1e-5,
             lr_scheduler_type="cosine_with_restarts",
             save_strategy="epoch",
             report_to="none",
             dataloader_num_workers=4,
         )
 
-        # Créer les datasets
+        # Créer les datasets pour l'entraînement et la validation
         train_dataset = CustomDataset(self.train_encodings, self.train_labels)
         val_dataset = CustomDataset(self.val_encodings, self.val_labels)
 
-        # Utiliser le trainer pour entraîner
+        # Utiliser CustomTrainer pour l'entraînement avec la perte pondérée
         trainer = CustomTrainer(
             model=self.model,
             args=training_args,
@@ -138,9 +190,53 @@ class IntentPredictionPipeline:
             compute_metrics=compute_metrics
         )
 
+        # Entraîner le modèle
         trainer.train()
 
-    def predict_intent(self, text, threshold=0.7):  # Ajuster le seuil à 0.7
+    def save_model(self, model_dir):
+        """
+        Sauvegarde le modèle, le tokenizer et le label encoder.
+        
+        Args:
+            model_dir (str): Le répertoire où sauvegarder les fichiers.
+        """
+        os.makedirs(model_dir, exist_ok=True)
+        
+        # Sauvegarder le modèle et le tokenizer
+        self.model.save_pretrained(model_dir)
+        self.tokenizer.save_pretrained(model_dir)
+
+        # Sauvegarder le label_encoder
+        with open(os.path.join(model_dir, 'label_encoder.pkl'), 'wb') as f:
+            pickle.dump(self.label_encoder, f)
+
+    def load_model(self, model_dir):
+        """
+        Charge le modèle, le tokenizer et le label encoder à partir des fichiers sauvegardés.
+        
+        Args:
+            model_dir (str): Le répertoire contenant les fichiers sauvegardés.
+        """
+        # Charger le modèle et le tokenizer
+        self.tokenizer = DebertaTokenizer.from_pretrained(model_dir)
+        self.model = DebertaForSequenceClassification.from_pretrained(model_dir).to(self.device)
+
+        # Charger le label_encoder
+        with open(os.path.join(model_dir, 'label_encoder.pkl'), 'rb') as f:
+            self.label_encoder = pickle.load(f)
+
+
+    def predict_intent(self, text, threshold=0.7):
+        """
+        Prédit l'intention d'une phrase donnée avec un seuil de confiance.
+        
+        Args:
+            text (str): La phrase à prédire.
+            threshold (float): Le seuil de confiance pour accepter une prédiction.
+        
+        Returns:
+            str: L'intention prédite ou 'unknown' si la confiance est inférieure au seuil.
+        """
         self.model.eval()
         with torch.no_grad():
             inputs = self.tokenizer(text, truncation=True, padding=True, max_length=128, return_tensors='pt')
@@ -149,8 +245,11 @@ class IntentPredictionPipeline:
             probabilities = torch.nn.functional.softmax(outputs.logits, dim=1)
             max_prob, predicted_label = torch.max(probabilities, dim=1)
 
-            # Ajustement du seuil
             if max_prob < threshold:
                 return "unknown"
             else:
-                return self.label_encoder.inverse_transform(predicted_label.cpu().numpy())[0]
+                try:
+                    return self.label_encoder.inverse_transform(predicted_label.cpu().numpy())[0]
+                except ValueError:
+                    # Si l'intention prédite n'est pas dans les labels connus, renvoyer "unknown"
+                    return "unknown"
