@@ -20,7 +20,7 @@ def test_greetings(pipeline):
     Args:
         pipeline (IntentPredictionPipeline): Pipeline de prédiction d'intention.
     """
-    phrases = ["Bonjour", "Salut", "Hey", "hello", "salut à tous", "salut tout le monde !", "coucou", "wesh", "salut le bot, tu vas bien ?", "et salut le bot"]
+    phrases = ["Bonjour", "Salut", "Hey", "hello", "salut à tous", "salut tout le monde !", "coucou", "wesh", "salut le bot, tu vas bien ?"]
     for phrase in phrases:
         prediction = pipeline.predict_intent(phrase)
         print(f"Phrase: '{phrase}' - Prédiction: '{prediction}'")

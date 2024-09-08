@@ -1,0 +1,82 @@
+{
+    "intents": {
+        "greetings": [
+            "Et salut à tous !",
+            "Et salut tout le monde !",
+            "Et salut les amis !",
+            "Et salut à vous tous !",
+            "Et salut l'équipe !",
+            "Et salut par ici !",
+            "Et salut à tous",
+            "Et salut tout le monde",
+            "Et salut les amis",
+            "Et salut à vous tous",
+            "Et salut l'équipe",
+            "Et salut par ici",
+            "Et salut toi",
+            "Et salut à toi",
+            "Et salut à toi :",
+            "Et salut toi !",
+            "Et salut !",
+            "Et salut",
+            "Et bonjour",
+            "Et bonjour !",
+            "Et bonjour toi",
+            "Et bonjour à toi !",
+            "Et salut le gars",
+            "Et salut le gars !",
+            "Et salut le bot",
+            "Et salut le bot !",
+            "salut le bot",
+            "salut le bot !",
+            "bonjour le bot",
+            "bonjour le bot !",
+            "hello le bot",
+            "hello le bot !",
+            "hey le bot",
+            "hey le bot !",
+            "Et salut, vous êtes prêts ?",
+            "Et salut à toutes et à tous !",
+            "Et salut tout le monde, comment ça va ?",
+            "Et salut à tous, c'est parti !",
+            "Et salut à tous, belle journée !",
+            "Et salut les amis, quoi de neuf ?",
+            "Et salut tout le monde, on y va ?",
+            "Et salut, c'est bien de vous voir !",
+            "Et salut à tout le monde ici !",
+            "Et salut, comment ça se passe ?",
+            "Et salut à vous, comment ça va ?",
+            "Et salut, l'équipe est prête ?",
+            "Et salut tout le monde, prêts pour aujourd'hui ?",
+            "Et salut, vous êtes là ?",
+            "Et bonjour à tous !",
+            "Et bonjour tout le monde !",
+            "Et bonjour les amis !",
+            "Et bonjour à vous tous !",
+            "Et bonjour l'équipe !",
+            "Et bonjour par ici !",
+            "Et bonjour, vous êtes prêts ?",
+            "Et bonjour à toutes et à tous !",
+            "Et bonjour tout le monde, comment ça va ?",
+            "Et bonjour à tous, c'est parti !"
+        ],
+        "health_status": [
+           
+        ],
+        "backseat": [
+            
+        ],
+        "bad": [
+            
+        ],
+        "common": [
+            
+        ],
+        "common_confirmation": [
+           
+        ],
+        "ask": [
+            
+        ]
+    }
+}

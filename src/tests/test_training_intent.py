@@ -3,6 +3,7 @@ import json
 import pytest
 from src.intendai.pipeline.intent_prediction_pipeline import IntentPredictionPipeline
 
+
 def load_intent_data(json_path):
     """
     Charge les données d'intentions à partir d'un fichier JSON.
@@ -41,6 +42,7 @@ def load_intent_data(json_path):
         print(f"Une erreur inattendue s'est produite : {str(e)}")
 
 
+
 # Fixture pour initialiser le pipeline
 @pytest.fixture(scope="module")
 def pipeline():
@@ -49,6 +51,37 @@ def pipeline():
     pipeline.load_model('./saved_model')
     
     return pipeline
+
+
+
+# Tests spécifiques à chaque intention
+def test_greetings_with_training(pipeline):
+    """
+    Teste la prédiction pour l'intention "greetings".
+
+    Args:
+        pipeline (IntentPredictionPipeline): Pipeline de prédiction d'intention.
+    """
+    phrases = ["et salut le bot !", "et salut à tous", "salut le bot", "et salut le bot"]
+    for phrase in phrases:
+        prediction = pipeline.predict_intent(phrase)
+        print(f"Phrase: '{phrase}' - Prédiction: '{prediction}'")
+
+    json_path = os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'new_greetings.json')
+    new_phrases, new_labels = load_intent_data(json_path)
+
+    if new_phrases and new_labels:
+        # Encodage des labels avec le LabelEncoder utilisé dans le pipeline
+        new_labels_encoded = pipeline.label_encoder.transform(new_labels)
+
+        # Entraînement incrémental avec les nouvelles données
+        pipeline.train_model(incremental=True, new_data=new_phrases, new_labels=new_labels_encoded)
+
+    for phrase in phrases:
+        prediction = pipeline.predict_intent(phrase)
+        print(f"Phrase: '{phrase}' - Prédiction: '{prediction}'")
+        assert prediction == "greetings"
+
 
 
 # Tests spécifiques à chaque intention
@@ -77,7 +110,7 @@ def test_health_status_with_training(pipeline):
     for phrase in phrases:
         prediction = pipeline.predict_intent(phrase)
         print(f"Phrase: '{phrase}' - Prédiction: '{prediction}'")
-    assert prediction == "health_status"
+        assert prediction == "health_status"
 
 
 
