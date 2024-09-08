@@ -1,0 +1,54 @@
+{
+    "intents": {
+        "greetings": [
+
+        ],
+        "health_status": [
+            "La forme ?",
+            "ça roule ?",
+            "ça gaz ?",
+            "ça se passe ?",
+            "il est comment ?",
+            "C'est la forme ?",
+            "Toujours la forme ?",
+            "Alors, la forme ?",
+            "La forme aujourd'hui ?",
+            "Comment, la forme ?",
+            "La forme, toi ?",
+            "Toujours en forme ?",
+            "Encore la forme ?",
+            "La forme, ça va ?",
+            "Et la forme, ça va ?",
+            "Dis-moi, la forme ?",
+            "La forme ou pas ?",
+            "La forme, là ?",
+            "La forme alors ?",
+            "C'est la forme ?",
+            "Ça va, la forme ?",
+            "Comment ça, la forme ?",
+            "La grande forme ?",
+            "Tu tiens la forme ?",
+            "La forme est là ?",
+            "Tout roule pour toi ?",
+            "T'es toujours aussi énergique ?",
+            "T'as l'air bien aujourd'hui, non ?",
+            "Tu te sens au top ?",
+            "T'as la pêche ?"
+        ],
+        "backseat": [
+            
+        ],
+        "bad": [
+            
+        ],
+        "common": [
+            
+        ],
+        "common_confirmation": [
+           
+        ],
+        "ask": [
+            
+        ]
+    }
+}

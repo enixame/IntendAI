@@ -18,7 +18,7 @@
             "module": "pytest",
             "console": "integratedTerminal",
             "args": [
-                "-s", "${file}"
+                "-s", "-v", "${file}"
             ],
             "cwd": "${workspaceFolder}"
         },
@@ -29,7 +29,7 @@
             "module": "pytest",
             "console": "integratedTerminal",
             "args": [
-                "-s", "${file}::${selectedText}"
+                "-s", "-v", "${file}::${selectedText}"
             ],
             "cwd": "${workspaceFolder}"
         },
@@ -38,6 +38,9 @@
             "type": "debugpy",
             "request": "launch",
             "module": "pytest",
+            "args": [
+                "-s", "-v"
+            ],
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}"
         }
