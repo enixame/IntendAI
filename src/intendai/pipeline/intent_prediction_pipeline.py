@@ -23,6 +23,8 @@ class CustomDataset(Dataset):
         self.labels = labels
 
     def __getitem__(self, idx):
+        if idx >= len(self.labels):
+            raise IndexError(f"Index {idx} out of bounds for dataset with size {len(self.labels)}")
         item = {key: val[idx].clone().detach() for key, val in self.encodings.items()}
         item['labels'] = torch.tensor(self.labels[idx]).long()
         return item
@@ -94,22 +96,45 @@ class IntentPredictionPipeline:
         Returns:
             Tuple (list, list): Liste des phrases et des labels encodés.
         """
-        with open(json_path, 'r', encoding='utf-8') as f:
-            data = json.load(f)
+        try:
+            with open(json_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
 
-        phrases = []
-        labels = []
+            phrases = []
+            labels = []
 
-        # Extraction des phrases et des labels depuis le fichier JSON
-        for intent, phrases_list in data["intents"].items():
-            phrases.extend(phrases_list)
-            labels.extend([intent] * len(phrases_list))
+            # Extraction des phrases et des labels depuis le fichier JSON
+            for intent, phrases_list in data["intents"].items():
+                phrases.extend(phrases_list)
+                labels.extend([intent] * len(phrases_list))
 
-        # Encode les labels avec LabelEncoder
-        self.label_encoder = LabelEncoder()
-        labels_encoded = self.label_encoder.fit_transform(labels)
+            # Encode les labels avec LabelEncoder
+            self.label_encoder = LabelEncoder()
+            labels_encoded = self.label_encoder.fit_transform(labels)
 
-        return phrases, labels_encoded
+            return phrases, labels_encoded
+    
+        except FileNotFoundError:
+            print(f"Erreur : le fichier '{json_path}' n'existe pas.")
+        except json.JSONDecodeError:
+            print(f"Erreur : le fichier '{json_path}' n'est pas un fichier JSON valide.")
+        except Exception as e:
+            print(f"Une erreur inattendue s'est produite : {str(e)}")
+
+
+    def initialize_data_encodings(self, train_texts, train_labels, val_texts=None, val_labels=None):
+        """
+        Initialise les encodages des données d'entraînement et de validation.
+        """
+        # Encoder les phrases d'entraînement avec le tokenizer
+        self.train_encodings = self.tokenizer(train_texts, truncation=True, padding=True, max_length=128, return_tensors='pt')
+        self.train_labels = train_labels
+        
+        if val_texts and val_labels:
+            # Encoder les phrases de validation avec le tokenizer
+            self.val_encodings = self.tokenizer(val_texts, truncation=True, padding=True, max_length=128, return_tensors='pt')
+            self.val_labels = val_labels
+
 
 
     def add_training_data(self, data, labels):
@@ -128,14 +153,8 @@ class IntentPredictionPipeline:
             data_balanced, labels_balanced, test_size=0.2, random_state=42
         )
 
-        # Encoder les phrases avec le tokenizer DeBERTa
-        train_encodings = self.tokenizer(train_texts, truncation=True, padding=True, max_length=128, return_tensors='pt')
-        val_encodings = self.tokenizer(val_texts, truncation=True, padding=True, max_length=128, return_tensors='pt')
-
-        self.train_encodings = train_encodings
-        self.train_labels = train_labels
-        self.val_encodings = val_encodings
-        self.val_labels = val_labels
+         # Initialiser les encodages pour l'entraînement et la validation
+        self.initialize_data_encodings(train_texts, train_labels, val_texts, val_labels)
 
         # Calculer les poids de classe pour compenser le déséquilibre
         unique_classes = np.unique(train_labels)
@@ -149,15 +168,25 @@ class IntentPredictionPipeline:
         self.class_weights = torch.tensor(weights, dtype=torch.float).to(self.device)
 
 
-    def train_model(self):
+    def train_model(self, incremental=False, new_data=None, new_labels=None):
         """
         Entraîne le modèle sur les données fournies.
         """
+        incremental_training = incremental and new_data is not None and new_labels is not None
+        num_train_epochs = 20 # nombre d'époque pour l'entrainement complet
+        per_device_train_batch_size=16  # Taille du batch
+        per_device_eval_batch_size=16  # Taille du batch
+        
+        if incremental_training:
+            num_train_epochs = 5  # Nombre d'époques pour un réentraînement
+            per_device_train_batch_size=1  # Taille du batch réduite
+            per_device_eval_batch_size=1  # Taille du batch réduite
+
         training_args = TrainingArguments(
             output_dir='./results',
-            num_train_epochs=20,  # Augmenter le nombre d'époques
-            per_device_train_batch_size=16,
-            per_device_eval_batch_size=16,
+            num_train_epochs=num_train_epochs,
+            per_device_train_batch_size=per_device_train_batch_size,
+            per_device_eval_batch_size=per_device_eval_batch_size,
             warmup_steps=500,
             weight_decay=0.02,
             logging_dir='./logs',
@@ -176,16 +205,25 @@ class IntentPredictionPipeline:
             dataloader_num_workers=4,
         )
 
-        # Créer les datasets pour l'entraînement et la validation
-        train_dataset = CustomDataset(self.train_encodings, self.train_labels)
-        val_dataset = CustomDataset(self.val_encodings, self.val_labels)
+        # Si incrémental, utiliser les nouvelles données
+        if incremental_training:
+            new_encodings = self.tokenizer(new_data, truncation=True, padding=True, max_length=128, return_tensors='pt')
+            train_dataset = CustomDataset(new_encodings, new_labels)
+        else:
+            train_dataset = CustomDataset(self.train_encodings, self.train_labels)
+
+        # Vérifier si val_encodings existe avant de l'utiliser
+        if hasattr(self, 'val_encodings') and hasattr(self, 'val_labels'):
+            val_dataset = CustomDataset(self.val_encodings, self.val_labels)
+        else:
+            val_dataset = None  # ou générer de nouvelles données de validation si nécessaire
 
         # Utiliser CustomTrainer pour l'entraînement avec la perte pondérée
         trainer = CustomTrainer(
             model=self.model,
             args=training_args,
             train_dataset=train_dataset,
-            eval_dataset=val_dataset,
+            eval_dataset=val_dataset if val_dataset else train_dataset,  # Utiliser train_dataset si pas de val_dataset
             class_weights=self.class_weights,
             compute_metrics=compute_metrics
         )
