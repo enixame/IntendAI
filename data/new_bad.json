@@ -1,0 +1,45 @@
+{
+    "intents": {
+        "greetings": [
+
+        ],
+        "health_status": [
+            
+        ],
+        "backseat": [
+            
+        ],
+        "bad": [
+            "T'es vraiment un gros bâtard",
+            "T'es vraiment un gros nul",
+            "T'es vraiment un incapable",
+            "T'es vraiment mauvais à ça",
+            "T'es vraiment un boulet",
+            "T'es vraiment médiocre",
+            "T'es vraiment une catastrophe ambulante",
+            "T'es vraiment pas doué",
+            "T'es vraiment à côté de la plaque",
+            "T'es vraiment un désastre",
+            "T'es vraiment pitoyable",
+            "T'es vraiment une calamité",
+            "T'es vraiment un échec ambulant",
+            "T'es vraiment mauvais",
+            "T'es vraiment inutile",
+            "T'es vraiment un désastre total",
+            "T'es vraiment incapable de réussir",
+            "T'es vraiment lamentable",
+            "T'es vraiment un cas désespéré",
+            "T'es vraiment un zéro absolu",
+            "T'es vraiment mauvais dans tout"
+        ],
+        "common": [
+            
+        ],
+        "common_confirmation": [
+           
+        ],
+        "ask": [
+            
+        ]
+    }
+}

@@ -143,3 +143,35 @@ def test_backseat_with_training(pipeline):
         prediction = pipeline.predict_intent(phrase)
         print(f"Phrase: '{phrase}' - Prédiction: '{prediction}'")
         assert prediction == "backseat"
+
+
+def test_bad_with_training(pipeline):
+    """
+    Teste la prédiction pour l'intention "bad".
+
+    Args:
+        pipeline (IntentPredictionPipeline): Pipeline de prédiction d'intention.
+    """
+
+    # Phase initiale de prédiction avant tout nouvel entraînement
+    phrase = "t'es vraiment un gros bâtard"
+    prediction = pipeline.predict_intent(phrase, threshold=0.6)
+    print(f"Phrase: '{phrase}' - Prédiction: '{prediction}'")
+
+    json_path = os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'new_bad.json')
+    new_phrases, new_labels = load_intent_data(json_path)
+
+    if new_phrases and new_labels:
+        # Encodage des labels avec le LabelEncoder utilisé dans le pipeline
+        new_labels_encoded = pipeline.label_encoder.transform(new_labels)
+
+        # Entraînement incrémental avec les nouvelles données
+        pipeline.train_model(incremental=True, new_data=new_phrases, new_labels=new_labels_encoded)
+
+    # Phase de prédiction après l'entraînement incrémental
+    prediction = pipeline.predict_intent(phrase, threshold=0.6)
+    print(f"Phrase: '{phrase}' - Prédiction: '{prediction}'")
+
+    # On peut ajouter une assertion pour vérifier que l'intention "bad" est bien détectée
+    assert prediction == "bad", f"Expected 'bad', but got '{prediction}'"
+

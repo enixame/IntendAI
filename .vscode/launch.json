@@ -5,6 +5,14 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Python Debugger: Server",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "src.intendai.server",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}"
+        },
+        {
             "name": "Python Debugger: Main",
             "type": "debugpy",
             "request": "launch",
@@ -18,7 +26,9 @@
             "module": "pytest",
             "console": "integratedTerminal",
             "args": [
-                "-s", "-v", "${file}"
+                "-s",
+                "-v",
+                "${file}"
             ],
             "cwd": "${workspaceFolder}"
         },
@@ -29,7 +39,9 @@
             "module": "pytest",
             "console": "integratedTerminal",
             "args": [
-                "-s", "-v", "${file}::${selectedText}"
+                "-s",
+                "-v",
+                "${file}::${selectedText}"
             ],
             "cwd": "${workspaceFolder}"
         },
@@ -39,7 +51,8 @@
             "request": "launch",
             "module": "pytest",
             "args": [
-                "-s", "-v"
+                "-s",
+                "-v"
             ],
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}"
