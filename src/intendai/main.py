@@ -21,9 +21,6 @@ def main():
     # Entraîner le modèle
     pipeline.train_model()
 
-    # save model
-    pipeline.save_model('./saved_model')
-
 
 if __name__ == "__main__":
     main()

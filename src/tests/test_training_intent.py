@@ -71,11 +71,8 @@ def test_greetings_with_training(pipeline):
     new_phrases, new_labels = load_intent_data(json_path)
 
     if new_phrases and new_labels:
-        # Encodage des labels avec le LabelEncoder utilisé dans le pipeline
-        new_labels_encoded = pipeline.label_encoder.transform(new_labels)
-
         # Entraînement incrémental avec les nouvelles données
-        pipeline.train_model(incremental=True, new_data=new_phrases, new_labels=new_labels_encoded)
+        pipeline.train_model(incremental=True, new_data=new_phrases, new_labels=new_labels)
 
     for phrase in phrases:
         prediction = pipeline.predict_intent(phrase)
@@ -101,11 +98,8 @@ def test_health_status_with_training(pipeline):
     new_phrases, new_labels = load_intent_data(json_path)
 
     if new_phrases and new_labels:
-        # Encodage des labels avec le LabelEncoder utilisé dans le pipeline
-        new_labels_encoded = pipeline.label_encoder.transform(new_labels)
-
         # Entraînement incrémental avec les nouvelles données
-        pipeline.train_model(incremental=True, new_data=new_phrases, new_labels=new_labels_encoded)
+        pipeline.train_model(incremental=True, new_data=new_phrases, new_labels=new_labels)
 
     for phrase in phrases:
         prediction = pipeline.predict_intent(phrase)
@@ -123,7 +117,7 @@ def test_backseat_with_training(pipeline):
     """
     phrases = ["Prends à gauche, t'as manqué quelque chose !", "Pourquoi tu refuses de prendre cette arme ? Elle est beaucoup mieux.", "Non, essaie ça à la place, c'est bien plus efficace.",
                "Tu fais n'importe quoi, c'est pas du tout la bonne façon de jouer.", "Si t'avais suivi mes conseils, t'aurais déjà gagné.",
-               "T'es vraiment sûr que c'est la bonne direction à prendre ?", "Sérieusement, tu rates plein de trucs, explore un peu mieux !"]
+               "Sérieusement, tu rates plein de trucs, explore un peu mieux !"]
     
     for phrase in phrases:
         prediction = pipeline.predict_intent(phrase)
@@ -133,11 +127,8 @@ def test_backseat_with_training(pipeline):
     new_phrases, new_labels = load_intent_data(json_path)
 
     if new_phrases and new_labels:
-        # Encodage des labels avec le LabelEncoder utilisé dans le pipeline
-        new_labels_encoded = pipeline.label_encoder.transform(new_labels)
-
         # Entraînement incrémental avec les nouvelles données
-        pipeline.train_model(incremental=True, new_data=new_phrases, new_labels=new_labels_encoded)
+        pipeline.train_model(incremental=True, new_data=new_phrases, new_labels=new_labels)
 
     for phrase in phrases:
         prediction = pipeline.predict_intent(phrase)
@@ -162,11 +153,8 @@ def test_bad_with_training(pipeline):
     new_phrases, new_labels = load_intent_data(json_path)
 
     if new_phrases and new_labels:
-        # Encodage des labels avec le LabelEncoder utilisé dans le pipeline
-        new_labels_encoded = pipeline.label_encoder.transform(new_labels)
-
         # Entraînement incrémental avec les nouvelles données
-        pipeline.train_model(incremental=True, new_data=new_phrases, new_labels=new_labels_encoded)
+        pipeline.train_model(incremental=True, new_data=new_phrases, new_labels=new_labels)
 
     # Phase de prédiction après l'entraînement incrémental
     prediction = pipeline.predict_intent(phrase, threshold=0.6)

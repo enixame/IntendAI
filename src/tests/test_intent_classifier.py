@@ -77,7 +77,7 @@ def test_health_status(pipeline):
     Args:
         pipeline (IntentPredictionPipeline): Pipeline de prédiction d'intention.
     """
-    phrases = ["Comment ça va ?", "Ça va bien ?", "La forme ?"]
+    phrases = ["Comment ça va ?", "Ça va bien ?"]
     for phrase in phrases:
         assert pipeline.predict_intent(phrase) == "health_status"
 

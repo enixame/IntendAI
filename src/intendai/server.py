@@ -46,27 +46,45 @@ def train_model():
         }
     }
     """
-    # Charger les données JSON depuis la requête POST
-    json_data = request.get_json()
+    if 'file' not in request.files:
+        return jsonify({"error": "No file part"}), 400
 
-    if not json_data:
-        return jsonify({"error": "No data provided"}), 400
+    file = request.files['file']
 
-    phrases, labels = [], []
-    for intent, phrase_list in json_data.get("intents", {}).items():
-        phrases.extend(phrase_list)
-        labels.extend([intent] * len(phrase_list))
+    if file.filename == '':
+        return jsonify({"error": "No selected file"}), 400
 
-    if not phrases or not labels:
-        return jsonify({"error": "Invalid data format"}), 400
+    # Vérifie si le fichier est un fichier JSON
+    if file and file.filename.endswith('.json'):
+        try:
+            # Charger et traiter le fichier JSON
+            data = file.read()
+            json_data = json.loads(data)
+            # Effectuer l'entraînement avec les données JSON
+            phrases, labels = [], []
+            # Parcourir les intentions et extraire les phrases et labels
+            for intent, phrases_list in json_data.get("intents", {}).items():
+                if phrases_list:  # Vérifier si la liste n'est pas vide
+                    phrases.extend(phrases_list)
+                    labels.extend([intent] * len(phrases_list))
 
-    # Encoder les labels avec le LabelEncoder utilisé dans le pipeline
-    labels_encoded = pipeline.label_encoder.transform(labels)
+            if not phrases or not labels:
+                return jsonify({"error": "Invalid data format"}), 400
+            
+            pipeline.load_model("./saved_model")
 
-    # Entraînement incrémental avec les nouvelles données
-    pipeline.train_model(incremental=True, new_data=phrases, new_labels=labels_encoded)
+            # Encoder les labels avec le LabelEncoder utilisé dans le pipeline
+            labels_encoded = pipeline.label_encoder.transform(labels)
 
-    return jsonify({"message": "Training completed successfully"})
+            # Entraînement incrémental avec les nouvelles données
+            pipeline.train_model(incremental=True, new_data=phrases, new_labels=labels_encoded)
+            return jsonify({"message": "Entraînement terminé avec succès."}), 200
+        
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+    else:
+        return jsonify({"error": "Unsupported file type. Please upload a JSON file."}), 415
+
 
 
 @app.route('/save_model', methods=['POST'])

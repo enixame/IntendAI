@@ -10,8 +10,33 @@ class DataPreprocessor:
     def __init__(self, tokenizer):
         self.tokenizer = tokenizer
 
+
     def encode_data(self, texts, max_length=128):
+        """
+        Encode les données textuelles en utilisant le tokenizer.
+        
+        Args:
+            texts (list): Liste de phrases à encoder.
+            max_length (int, optionnel): Longueur maximale des séquences. Défaut : 128.
+            
+        Returns:
+            dict: Encodage des textes sous forme de tenseurs.
+        """
         return self.tokenizer(texts, truncation=True, padding=True, max_length=max_length, return_tensors='pt')
+
+    
+    def decode_data(self, encodings):
+        """
+        Décode les encodages en phrases originales.
+        
+        Args:
+            encodings (dict): Encodages des phrases générés par le tokenizer.
+            
+        Returns:
+            list: Liste des phrases d'origine.
+        """
+        return self.tokenizer.batch_decode(encodings['input_ids'], skip_special_tokens=True)
+
 
     def balance_data(self, data, labels):
         """
